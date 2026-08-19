@@ -5,6 +5,7 @@ import type {
   LayeredElement,
   PersonElementProps,
   PosterTemplateData,
+  RectangleElementProps,
   RasterElementProps,
   SVGElementProps,
   TextElementProps,
@@ -1636,6 +1637,11 @@ async function generateUnifiedLayeredElements(
           );
           break;
         }
+        case 'rectangle': {
+          const props = element.properties as RectangleElementProps;
+          elementContent = generateRectangleElement(element, props);
+          break;
+        }
       }
 
       if (elementContent) {
@@ -1660,6 +1666,38 @@ async function generateUnifiedLayeredElements(
   }
 
   return renderedElements.join('');
+}
+
+function generateRectangleElement(
+  element: LayeredElement,
+  props: RectangleElementProps
+): string {
+  const opacity = Math.min(100, Math.max(0, props.opacity ?? 100)) / 100;
+  const radius = Math.max(0, props.cornerRadius ?? 0);
+  const borderWidth = Math.max(0, props.borderWidth ?? 0);
+  const gradientId = `rectangle-gradient-${element.id}`;
+  const angle = ((props.gradientAngle ?? 0) * Math.PI) / 180;
+  const halfWidth = element.width / 2;
+  const halfHeight = element.height / 2;
+  const x1 = element.x + halfWidth - Math.cos(angle) * halfWidth;
+  const y1 = element.y + halfHeight - Math.sin(angle) * halfHeight;
+  const x2 = element.x + halfWidth + Math.cos(angle) * halfWidth;
+  const y2 = element.y + halfHeight + Math.sin(angle) * halfHeight;
+  const fill =
+    props.fillType === 'linear-gradient'
+      ? `url(#${gradientId})`
+      : props.fillColor;
+
+  return `
+    ${
+      props.fillType === 'linear-gradient'
+        ? `<defs><linearGradient id="${gradientId}" gradientUnits="userSpaceOnUse" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"><stop offset="0%" stop-color="${props.fillColor}"/><stop offset="100%" stop-color="${props.secondaryColor || props.fillColor}"/></linearGradient></defs>`
+        : ''
+    }
+    <rect x="${element.x}" y="${element.y}" width="${element.width}" height="${element.height}"
+      rx="${radius}" ry="${radius}" fill="${fill}" opacity="${opacity}"
+      ${props.borderColor && borderWidth ? `stroke="${props.borderColor}" stroke-width="${borderWidth}"` : ''}/>
+  `;
 }
 
 /**

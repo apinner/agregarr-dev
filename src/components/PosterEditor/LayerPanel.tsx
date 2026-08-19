@@ -21,6 +21,7 @@ import type {
   PersonElementProps,
   PosterEditorData,
   RasterElementProps,
+  RectangleElementProps,
   SVGElementProps,
   TextElementProps,
 } from './PosterEditorModal';
@@ -33,6 +34,7 @@ const messages = defineMessages({
   addSourceLogo: 'Add Source Logo',
   addCustomSVGIcon: 'Add Custom SVG Icon',
   addGrid: 'Add Grid',
+  addRectangle: 'Add Rectangle',
   moveUp: 'Move Up',
   moveDown: 'Move Down',
   deleteElement: 'Delete Element',
@@ -44,6 +46,7 @@ const messages = defineMessages({
   sourceIcon: 'Source Icon',
   customIcon: 'Custom Icon',
   contentGrid: 'Content Grid',
+  rectangle: 'Rectangle',
   noElementSelected: 'Select an element to edit its properties',
   elements: 'Elements',
   noElementsAdded: 'No elements added yet',
@@ -75,6 +78,12 @@ const messages = defineMessages({
   spacing: 'Spacing',
   cornerRadius: 'Corner Radius',
   opacity: 'Opacity',
+  fill: 'Fill',
+  solid: 'Solid',
+  linearGradient: 'Linear Gradient',
+  gradientAngle: 'Gradient Angle',
+  borderColor: 'Border Color',
+  borderWidth: 'Border Width',
   // Background properties
   background: 'Background',
   backgroundType: 'Type',
@@ -302,6 +311,7 @@ export const LayerPanel: React.FC<LayerPanelProps> = ({
         | SVGElementProps
         | ContentGridProps
         | PersonElementProps
+        | RectangleElementProps
       >
     ) => {
       const elementIndex = elements.findIndex((el) => el.id === elementId);
@@ -586,6 +596,30 @@ export const LayerPanel: React.FC<LayerPanelProps> = ({
           };
           break;
         }
+        case 'rectangle':
+          newElement = {
+            id: elementId,
+            layerOrder: maxLayerOrder + 1,
+            type: 'rectangle',
+            x: (posterData.width - 500) / 2,
+            y: centerY,
+            width: 500,
+            height: 180,
+            properties: {
+              fillType: 'linear-gradient',
+              fillColor: '#f97316',
+              secondaryColor: '#c2410c',
+              gradientAngle: 0,
+              opacity: 90,
+              borderWidth: 0,
+              cornerRadius: 0,
+            } as RectangleElementProps,
+          };
+          onAspectRatioLockedChange?.({
+            ...aspectRatioLocked,
+            [elementId]: false,
+          });
+          break;
         default:
           return;
       }
@@ -598,7 +632,14 @@ export const LayerPanel: React.FC<LayerPanelProps> = ({
       // Select the new element
       onElementSelect(elementId);
     },
-    [elements, posterData, onChange, onElementSelect]
+    [
+      elements,
+      posterData,
+      onChange,
+      onElementSelect,
+      aspectRatioLocked,
+      onAspectRatioLockedChange,
+    ]
   );
 
   const getElementIcon = (type: LayeredElement['type']) => {
@@ -612,6 +653,8 @@ export const LayerPanel: React.FC<LayerPanelProps> = ({
       case 'svg':
         return CodeBracketSquareIcon;
       case 'content-grid':
+        return Squares2X2Icon;
+      case 'rectangle':
         return Squares2X2Icon;
       default:
         return DocumentTextIcon;
@@ -638,6 +681,8 @@ export const LayerPanel: React.FC<LayerPanelProps> = ({
       }
       case 'content-grid':
         return intl.formatMessage(messages.contentGrid);
+      case 'rectangle':
+        return intl.formatMessage(messages.rectangle);
       default:
         return element.id;
     }
@@ -744,6 +789,21 @@ export const LayerPanel: React.FC<LayerPanelProps> = ({
               ))}
             </div>
           </div>
+        );
+      }
+      case 'rectangle': {
+        const props = element.properties as RectangleElementProps;
+        return (
+          <div
+            className="h-6 w-8 rounded"
+            style={{
+              background:
+                props.fillType === 'linear-gradient'
+                  ? `linear-gradient(${props.gradientAngle ?? 0}deg, ${props.fillColor}, ${props.secondaryColor || props.fillColor})`
+                  : props.fillColor,
+              opacity: (props.opacity ?? 100) / 100,
+            }}
+          />
         );
       }
       default:
@@ -1156,6 +1216,15 @@ export const LayerPanel: React.FC<LayerPanelProps> = ({
             >
               <PlusIcon className="h-3 w-3" />
               {intl.formatMessage(messages.addGrid)}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleAddElement('rectangle')}
+              className="flex w-full items-center justify-center gap-1 rounded bg-stone-700 px-2 py-1 text-xs text-white hover:bg-stone-600"
+            >
+              <PlusIcon className="h-3 w-3" />
+              {intl.formatMessage(messages.addRectangle)}
             </button>
           </div>
         </div>
@@ -2080,6 +2149,170 @@ export const LayerPanel: React.FC<LayerPanelProps> = ({
                       />
                     </div>
                   </div>
+                </div>
+              )}
+
+              {selectedElement.type === 'rectangle' && (
+                <div className="space-y-3">
+                  {(() => {
+                    const props = selectedElement.properties as RectangleElementProps;
+                    return (
+                      <>
+                        <div>
+                          <label className="mb-1 block text-xs text-stone-400">
+                            {intl.formatMessage(messages.fill)}
+                          </label>
+                          <select
+                            value={props.fillType}
+                            onChange={(e) =>
+                              updateElementProperties(selectedElement.id, {
+                                fillType: e.target.value as RectangleElementProps['fillType'],
+                              })
+                            }
+                            className="w-full rounded border border-stone-600 bg-stone-800 px-2 py-1 text-xs text-white"
+                          >
+                            <option value="solid">
+                              {intl.formatMessage(messages.solid)}
+                            </option>
+                            <option value="linear-gradient">
+                              {intl.formatMessage(messages.linearGradient)}
+                            </option>
+                          </select>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                          <label className="text-xs text-stone-400">
+                            {intl.formatMessage(messages.primaryColor)}
+                            <input
+                              type="color"
+                              value={props.fillColor}
+                              onChange={(e) =>
+                                updateElementProperties(selectedElement.id, {
+                                  fillColor: e.target.value,
+                                })
+                              }
+                              className="mt-1 h-8 w-full rounded bg-stone-800"
+                            />
+                          </label>
+                          {props.fillType === 'linear-gradient' && (
+                            <label className="text-xs text-stone-400">
+                              {intl.formatMessage(messages.secondaryColor)}
+                              <input
+                                type="color"
+                                value={props.secondaryColor || props.fillColor}
+                                onChange={(e) =>
+                                  updateElementProperties(selectedElement.id, {
+                                    secondaryColor: e.target.value,
+                                  })
+                                }
+                                className="mt-1 h-8 w-full rounded bg-stone-800"
+                              />
+                            </label>
+                          )}
+                        </div>
+                        {props.fillType === 'linear-gradient' && (
+                          <label className="block text-xs text-stone-400">
+                            {intl.formatMessage(messages.gradientAngle)} ({props.gradientAngle ?? 0}°)
+                            <input
+                              type="range"
+                              min="0"
+                              max="360"
+                              value={props.gradientAngle ?? 0}
+                              onChange={(e) =>
+                                updateElementProperties(selectedElement.id, {
+                                  gradientAngle: Number(e.target.value),
+                                })
+                              }
+                              className="mt-1 w-full"
+                            />
+                          </label>
+                        )}
+                        <div className="grid grid-cols-2 gap-2">
+                          <label className="text-xs text-stone-400">
+                            {intl.formatMessage(messages.opacity)} ({props.opacity ?? 100}%)
+                            <input
+                              type="range"
+                              min="0"
+                              max="100"
+                              value={props.opacity ?? 100}
+                              onChange={(e) =>
+                                updateElementProperties(selectedElement.id, {
+                                  opacity: Number(e.target.value),
+                                })
+                              }
+                              className="mt-1 w-full"
+                            />
+                          </label>
+                          <label className="text-xs text-stone-400">
+                            {intl.formatMessage(messages.cornerRadius)} ({props.cornerRadius ?? 0}px)
+                            <input
+                              type="range"
+                              min="0"
+                              max="100"
+                              value={props.cornerRadius ?? 0}
+                              onChange={(e) =>
+                                updateElementProperties(selectedElement.id, {
+                                  cornerRadius: Number(e.target.value),
+                                })
+                              }
+                              className="mt-1 w-full"
+                            />
+                          </label>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                          <label className="text-xs text-stone-400">
+                            {intl.formatMessage(messages.borderColor)}
+                            <input
+                              type="color"
+                              value={props.borderColor || '#000000'}
+                              onChange={(e) =>
+                                updateElementProperties(selectedElement.id, {
+                                  borderColor: e.target.value,
+                                })
+                              }
+                              className="mt-1 h-8 w-full rounded bg-stone-800"
+                            />
+                          </label>
+                          <label className="text-xs text-stone-400">
+                            {intl.formatMessage(messages.borderWidth)} ({props.borderWidth ?? 0}px)
+                            <input
+                              type="range"
+                              min="0"
+                              max="30"
+                              value={props.borderWidth ?? 0}
+                              onChange={(e) =>
+                                updateElementProperties(selectedElement.id, {
+                                  borderWidth: Number(e.target.value),
+                                })
+                              }
+                              className="mt-1 w-full"
+                            />
+                          </label>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                          <label className="text-xs text-stone-400">
+                            {intl.formatMessage(messages.width)}
+                            <input
+                              type="number"
+                              min="10"
+                              value={selectedElement.width}
+                              onChange={(e) => updateElement(selectedElement.id, { width: Number(e.target.value) })}
+                              className="mt-1 w-full rounded border border-stone-600 bg-stone-800 px-2 py-1 text-xs text-white"
+                            />
+                          </label>
+                          <label className="text-xs text-stone-400">
+                            {intl.formatMessage(messages.height)}
+                            <input
+                              type="number"
+                              min="10"
+                              value={selectedElement.height}
+                              onChange={(e) => updateElement(selectedElement.id, { height: Number(e.target.value) })}
+                              className="mt-1 w-full rounded border border-stone-600 bg-stone-800 px-2 py-1 text-xs text-white"
+                            />
+                          </label>
+                        </div>
+                      </>
+                    );
+                  })()}
                 </div>
               )}
 

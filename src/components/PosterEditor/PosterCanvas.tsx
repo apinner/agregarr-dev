@@ -15,6 +15,7 @@ import { Layer, Stage, Transformer } from 'react-konva';
 import { Background } from './Background';
 import { ContentGridElement } from './ContentGridElement';
 import { ImageElement } from './ImageElement';
+import { RectangleElement } from './RectangleElement';
 import type {
   EditorMode,
   LayeredElement,
@@ -330,6 +331,8 @@ export const PosterCanvas = forwardRef<PosterCanvasRef, PosterCanvasProps>(
           return <SVGElement {...shapeProps} />;
         case 'content-grid':
           return <ContentGridElement {...shapeProps} />;
+        case 'rectangle':
+          return <RectangleElement {...shapeProps} />;
         default:
           return null;
       }

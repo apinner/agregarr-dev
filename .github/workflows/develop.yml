@@ -93,10 +93,10 @@ jobs:
         id: tags
         run: |
           if [[ "$GITHUB_REF" == refs/heads/develop ]]; then
-            echo "tags=bitr8/agregarr:develop" >> "$GITHUB_OUTPUT"
+            echo "tags=alphapapa84/agregarr:develop" >> "$GITHUB_OUTPUT"
           else
             SLUG="${GITHUB_REF#refs/heads/feature/}"
-            echo "tags=bitr8/agregarr:${SLUG}" >> "$GITHUB_OUTPUT"
+            echo "tags=alphapapa84/agregarr:${SLUG}" >> "$GITHUB_OUTPUT"
           fi
       - name: Fail if the develop version was bumped
         if: steps.skip.outputs.skip != 'true'
@@ -164,7 +164,7 @@ jobs:
           platforms: ${{ matrix.platform }}
           build-args: |
             COMMIT_TAG=${{ github.sha }}
-          outputs: type=image,name=bitr8/agregarr,push-by-digest=true,name-canonical=true,push=true
+          outputs: type=image,name=alphapapa84/agregarr,push-by-digest=true,name-canonical=true,push=true
       # v2.8.0 shipped reporting 2.7.0. Assert on the image, not on the
       # injection step having exited 0. Fails before merge_release moves
       # :latest, so a mismatched build never becomes user-visible.
@@ -172,7 +172,7 @@ jobs:
         run: |
           want="${GITHUB_REF#refs/tags/v}"
           got=$(docker run --rm --entrypoint node \
-            "bitr8/agregarr@${{ steps.build.outputs.digest }}" \
+            "alphapapa84/agregarr@${{ steps.build.outputs.digest }}" \
             -e 'console.log(require("/app/package.json").version)')
           echo "tag=$want image=$got"
           if [ "$want" != "$got" ]; then
@@ -218,16 +218,16 @@ jobs:
           # A pre-release (v2.8.1-rc1) gets its own tag and must not move
           # :latest, so the whole release path can be rehearsed on a throwaway.
           if [[ "$VERSION" == *-* ]]; then
-            echo "tags=bitr8/agregarr:${VERSION}" >> "$GITHUB_OUTPUT"
+            echo "tags=alphapapa84/agregarr:${VERSION}" >> "$GITHUB_OUTPUT"
           else
-            echo "tags=bitr8/agregarr:latest,bitr8/agregarr:${VERSION}" >> "$GITHUB_OUTPUT"
+            echo "tags=alphapapa84/agregarr:latest,alphapapa84/agregarr:${VERSION}" >> "$GITHUB_OUTPUT"
           fi
       - name: Create manifest and push
         working-directory: /tmp/digests
         run: |
           TAGS=$(echo "${{ steps.tags.outputs.tags }}" | tr ',' '\n' | sed 's/^/-t /' | tr '\n' ' ')
           docker buildx imagetools create $TAGS \
-            $(printf 'bitr8/agregarr@sha256:%s ' *)
+            $(printf 'alphapapa84/agregarr@sha256:%s ' *)
       # Inspect what this run actually pushed. Hardcoding :latest meant a
       # pre-release printed the previous release and looked verified.
       - name: Inspect images

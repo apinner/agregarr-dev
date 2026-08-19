@@ -1,8 +1,8 @@
 # Agregarr (bitr8 fork)
 
-[![Latest release](https://img.shields.io/github/v/release/bitr8/agregarr-dev?label=release&color=blue)](https://github.com/bitr8/agregarr-dev/releases/latest) [![Docker pulls](https://img.shields.io/docker/pulls/bitr8/agregarr)](https://hub.docker.com/r/bitr8/agregarr) [![License](https://img.shields.io/badge/license-GPL--3.0-blue)](LICENSE)
+[![Latest release](https://img.shields.io/github/v/release/apinner/agregarr-dev?label=release&color=blue)](https://github.com/apinner/agregarr-dev/releases/latest) [![Docker pulls](https://img.shields.io/docker/pulls/alphapapa84/agregarr)](https://hub.docker.com/r/alphapapa84/agregarr) [![License](https://img.shields.io/badge/license-GPL--3.0-blue)](LICENSE)
 
-Active fork of [Agregarr](https://github.com/agregarr/agregarr) with performance fixes, placeholder lifecycle improvements, FlareSolverr support, and open upstream PRs bundled into a single Docker image. Available as `bitr8/agregarr` on Docker Hub.
+Active fork of [Agregarr](https://github.com/agregarr/agregarr) with performance fixes, placeholder lifecycle improvements, FlareSolverr support, and open upstream PRs bundled into a single Docker image. Available as `alphapapa84/agregarr` on Docker Hub.
 
 > [!TIP]
 >
@@ -10,7 +10,7 @@ Active fork of [Agregarr](https://github.com/agregarr/agregarr) with performance
 
 ## Docker
 
-Available on Docker Hub as [`bitr8/agregarr`](https://hub.docker.com/r/bitr8/agregarr).
+Available on Docker Hub as [`alphapapa84/agregarr`](https://hub.docker.com/r/alphapapa84/agregarr).
 
 | Tag             | What it tracks                                             |
 | --------------- | ---------------------------------------------------------- |
@@ -24,7 +24,7 @@ Available on Docker Hub as [`bitr8/agregarr`](https://hub.docker.com/r/bitr8/agr
 
 ```diff
 -    image: agregarr/agregarr:latest
-+    image: bitr8/agregarr:latest
++    image: alphapapa84/agregarr:latest
 ```
 
 ### Compose example
@@ -32,7 +32,7 @@ Available on Docker Hub as [`bitr8/agregarr`](https://hub.docker.com/r/bitr8/agr
 ```yaml
 services:
   agregarr:
-    image: bitr8/agregarr:latest
+    image: alphapapa84/agregarr:latest
     container_name: agregarr
     volumes:
       - /path/to/config:/app/config

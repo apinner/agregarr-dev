@@ -52,7 +52,7 @@ export type EditorMode =
 export interface LayeredElement {
   id: string;
   layerOrder: number; // 0 = bottom, higher = top
-  type: 'text' | 'raster' | 'svg' | 'content-grid' | 'person';
+  type: 'text' | 'raster' | 'svg' | 'content-grid' | 'person' | 'rectangle';
 
   // Common properties
   x: number;
@@ -68,7 +68,8 @@ export interface LayeredElement {
     | RasterElementProps
     | SVGElementProps
     | ContentGridProps
-    | PersonElementProps;
+    | PersonElementProps
+    | RectangleElementProps;
 }
 
 export interface TextElementProps {
@@ -107,6 +108,17 @@ export interface ContentGridProps {
   rows: number;
   spacing: number;
   cornerRadius: number;
+}
+
+export interface RectangleElementProps {
+  fillType: 'solid' | 'linear-gradient';
+  fillColor: string;
+  secondaryColor?: string;
+  gradientAngle?: number;
+  opacity?: number;
+  borderColor?: string;
+  borderWidth?: number;
+  cornerRadius?: number;
 }
 
 export interface PosterEditorData {
