@@ -1,6 +1,7 @@
 name: Agregarr Develop
 
 on:
+  workflow_dispatch:
   pull_request:
     branches:
       - '*'
